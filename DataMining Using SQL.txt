@@ -1,0 +1,70 @@
+
+1.Display a single relation with: OrderId, OrderDate, CustomerName, City, Address, PostalCode, ShipperName, ProductName, Quantity.
+SELECT o.orderid,o.orderdate,C.CustomerName,C.City,C.Address,C.Postalcode,S.shipperName,P.ProductName,OD.Quantity
+FROM CUSTOMERS as C
+JOIN Orders as O on O.CustomerID=C.CustomerID
+JOIN OrderDetails as OD on OD.OrderID=o.orderID
+JOIN Shippers as S on s.shipperID=O.shipperID
+JOIN Products as P on P.ProductID = OD.productID;
+
+
+2.Display all products ever been ordered and display the shipper name.
+SELECT  S.ShipperName,P.ProductName
+FROM Orders as O
+JOIN Shippers as S on O.ShipperID=S.ShipperID
+JOIN OrderDetails as OD on O.OrderID=OD.OrderID
+JOIN Products as P on P.ProductID=OD.ProductID;
+
+3.Display the count of all products shipped by each of the 3 shippers.
+SELECT S.ShipperName,COUNT(P.ProductName)
+FROM Orders as O
+JOIN Shippers as S on O.ShipperID=S.ShipperID
+JOIN OrderDetails as OD on O.OrderID=OD.OrderID
+JOIN Products as P on P.ProductID=OD.ProductID
+GROUP BY ShipperName;
+
+4.How many customers DO NOT have the words ‘son’ in their CustomerName.
+SELECT COUNT(CustomerName)FROM Customers
+WHERE CustomerName NOT LIKE '%son%';
+
+5.Find the total sales made in the year 1997.
+SELECT SUM(OrderDetails.Quantity*Products.Price) as Sales
+FROM OrderDetails,Products,Orders
+WHERE OrderDate LIKE "1997%";
+
+6.Find the top supplier of the business (in terms of products ordered).
+SELECT OD.OrderdetailID,S.SupplierName,MAX(OD.ProductID*OD.Quantity),S.SupplierID,OD.OrderID,P.ProductName
+FROM OrderDetails as OD
+JOIN Orders as O on O.OrderID=OD.OrderID
+JOIN Products as P on P.ProductID=OD.ProductID
+JOIN Suppliers as S on S.SupplierID=P.SupplierID;
+
+7.Find the total sales of each product.
+SELECT (P.Price*OD.Quantity) as ProductSales,OD.OrderID,P.ProductName,P.ProductID
+FROM OrderDetails as OD
+JOIN Orders as O on O.OrderID=OD.OrderID
+JOIN Products as P on P.ProductID=OD.ProductID;
+
+8.Find the best performing month in the business in terms of sales.
+SELECT O.OrderDate,SUBSTR(O.OrderDate,6,2) as Months,SUM(OD.Quantity*P.Price) as ProductSales
+FROM OrderDetails as OD
+JOIN Orders as O on O.OrderID=OD.OrderID 
+JOIN Products as P on P.ProductID=OD.ProductID
+GROUP BY Months
+ORDER BY ProductSales DESC
+LIMIT 1;
+
+9.Find the total sales per day.
+SELECT SUM(P.Price*OD.Quantity) AS SalesPerDay,O.OrderDate
+FROM Orders as O
+JOIN OrderDetails as OD on O.OrderID=OD.OrderID
+JOIN Products as P on P.ProductID=OD.ProductID
+GROUP BY OrderDate;
+
+10.Find the total Sales for each Customer, the ones who have never ordered leave as 0.
+SELECT C.CustomerName,SUM(OD.Quantity*P.Price) as SalesForEachCustomer,C.CustomerID
+FROM Orders as O
+JOIN Customers as C on O.CustomerID=C.CustomerID
+JOIN OrderDetails as OD on O.OrderID=OD.OrderID
+JOIN Products as P on OD.ProductID=P.ProductID
+GROUP BY C.CustomerName;
